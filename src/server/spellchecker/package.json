@@ -1,0 +1,37 @@
+{
+  "name": "simple-spellchecker",
+  "version": "0.9.8",
+  "description": "A simple spellchecker compatible with Electron",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfmdev/simple-spellchecker.git"
+  },
+  "keywords": [
+    "simple",
+    "spell",
+    "checker",
+    "electron",
+    "provider",
+    "spellcheck"
+  ],
+  "author": "JFMDev",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/jfmdev/simple-spellchecker/issues"
+  },
+  "homepage": "https://github.com/jfmdev/simple-spellchecker#readme",
+  "dependencies": {
+    "binarysearch": "^0.2.4",
+    "damerau-levenshtein": "git://github.com/cbaatz/damerau-levenshtein.git",
+    "strip-bom": "^2.0.0",
+    "unzip-stream": "^0.3.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
