@@ -1,39 +1,19 @@
 const express = require('express');
 const app = express();
-const spellChecker = require('./spellchecker');
+const spellchecker = require('./spellchecker');
 const bodyParser = require('body-parser');
 
 const dictionariesToBeLoaded = [
   'en',
   'en_MED'
 ];
-const dictionaries = dictionariesToBeLoaded.map(dictionaryName => spellChecker.getDictionarySync(dictionaryName));
+const dictionaries = dictionariesToBeLoaded.map(dictionaryName => spellchecker.DictionaryLoader.getDictionarySync(dictionaryName));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
-  const result = {
-    isMisspelled: true,
-    suggestions: []
-  };
-  const text = req.body.text;
-  
-  for (let i = 0; i < dictionaries.length; i++) {
-    if (!dictionaries[i].wordIsMisspelled(text)) {
-      result.isMisspelled = false;
-      break;
-    }
-  }
-  
-  if (result.isMisspelled) {
-    for (let i = 0; i < dictionaries.length; i++) {
-      const dictSuggestions = dictionaries[i].getSuggestions(text, 5, 5);
-      result.suggestions.push(dictSuggestions);
-    }
-  }
-  
-  res.send(result);
+  res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
 });
 
 app.listen(2999, function () {

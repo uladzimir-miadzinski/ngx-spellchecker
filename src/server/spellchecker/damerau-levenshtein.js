@@ -1,3 +1,5 @@
+// https://github.com/cbaatz/damerau-levenshtein
+
 function DamerauLevenshtein(prices, damerau) {
   // 'prices' customisation of the edit costs by passing an
   // object with optional 'insert', 'remove', 'substitute', and

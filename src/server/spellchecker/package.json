@@ -23,7 +23,9 @@
   "homepage": "https://github.com/uladzimir-miadzinski/ngx-spellchecker",
   "dependencies": {
     "binarysearch": "1.0.0",
-    "strip-bom": "3.0.0"
+    "strip-bom": "3.0.0",
+    "array-uniq": "2.0.0",
+    "alpha-sort": "2.0.1"
   },
   "devDependencies": {
     "chai": "4.2.0",
