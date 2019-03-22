@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
   const text = req.body.text;
   
   for (let i = 0; i < dictionaries.length; i++) {
-    if (!dictionaries[i].isMisspelled(text)) {
+    if (!dictionaries[i].wordIsMisspelled(text)) {
       result.isMisspelled = false;
       break;
     }

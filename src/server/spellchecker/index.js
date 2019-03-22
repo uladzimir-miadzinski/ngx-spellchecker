@@ -14,8 +14,8 @@ const SpellChecker = {
   getDictionary: function (fileName, folderPath, callback) {
     try {
       // Initialize variables.
-      var folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
-      var dic_path = folder + '/' + fileName + '.dic';
+      const folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
+      const dic_path = folder + '/' + fileName + '.dic';
       
       // Verify if the dictionary file exists.
       fs.exists(dic_path, function (exists) {
@@ -67,7 +67,6 @@ const SpellChecker = {
       // Initialize variables.
       var folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
       var dic_path = folder + '/' + fileName + '.dic';
-      var zip_path = folder + '/' + fileName + '.zip';
       
       // Verify if the dictionary file exists.
       if (fs.existsSync(dic_path)) {
@@ -117,7 +116,7 @@ const SpellChecker = {
               var newContent = '';
               var first = true;
               for (var i = 0; i < lines.length; i++) {
-                if (lines[i] != '' && lines[i] != '\n') {
+                if (lines[i] !== '' && lines[i] !== '\n') {
                   if (!first) newContent += '\n';
                   newContent += lines[i];
                   first = false;
