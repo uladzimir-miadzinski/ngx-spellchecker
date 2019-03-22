@@ -1,4 +1,4 @@
-Simple Spellchecker
+Spellchecker
 ===================
 
 > A simple and fast spellchecker with spelling suggestions and Electron's integration
@@ -7,9 +7,9 @@ Simple Spellchecker
 Features
 --------
 
-**Simple Spellchecker** is a spellchecker module for Node.js, that allows to check if a word is misspelled and to get spelling suggestions.
+**Spellchecker** is a spellchecker module for Node.js, that allows to check if a word is misspelled and to get spelling suggestions.
 
-It comes with dictionaries for English, Spanish, French, German and Dutch, but you can easily add more languages by simply defining a text file with a list of valid words.
+It comes with dictionaries for English, En_MED, but you can easily add more languages by simply defining a text file with a list of valid words.
 
 It also has a CLI tool that allows to check words from the command line.
 

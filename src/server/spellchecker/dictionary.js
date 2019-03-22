@@ -1,12 +1,5 @@
-/*
- * Copyright (c) 2016 José F. Maldonado
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-// Load dependencies.
 const BinarySearch = require('binarysearch');
-const EditDistance = require('damerau-levenshtein');
+const DL = require('./damerau-levenshtein')();
 
 // Use this object for consider accents and special characters when comparing UTF-8 strings.
 var Collator = new Intl.Collator(undefined, {'sensitivity': 'accent'});
@@ -109,7 +102,7 @@ Dictionary.prototype.getSuggestions = function (word, limit, maxDistance) {
       // The index 'k' is going to be 0, 1, -1, 2, -2...
       k = closest + (i % 2 != 0 ? ((i + 1) / 2) : (-i / 2));
       if (k >= 0 && k < this.wordlist.length) {
-        dist = EditDistance(word, this.wordlist[k].toLowerCase());
+        dist = DL(word, this.wordlist[k].toLowerCase());
         if (dist <= maxDistance) res[dist].push(this.wordlist[k]);
       }
     }

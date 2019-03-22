@@ -1,37 +1,32 @@
 {
-  "name": "simple-spellchecker",
-  "version": "0.9.8",
-  "description": "A simple spellchecker compatible with Electron",
+  "name": "ngx-spellchecker",
+  "version": "0.0.1",
+  "description": "Spellchecker for Angular7+",
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jfmdev/simple-spellchecker.git"
+    "url": "git+https://github.com/uladzimir-miadzinski/ngx-spellchecker.git"
   },
   "keywords": [
-    "simple",
     "spell",
     "checker",
-    "electron",
-    "provider",
-    "spellcheck"
+    "spellcheck",
+    "angular"
   ],
-  "author": "JFMDev",
-  "license": "MPL-2.0",
+  "author": "Uladzimir Miadzinski",
   "bugs": {
-    "url": "https://github.com/jfmdev/simple-spellchecker/issues"
+    "url": "https://github.com/uladzimir-miadzinski/ngx-spellchecker/issues"
   },
-  "homepage": "https://github.com/jfmdev/simple-spellchecker#readme",
+  "homepage": "https://github.com/uladzimir-miadzinski/ngx-spellchecker",
   "dependencies": {
-    "binarysearch": "^0.2.4",
-    "damerau-levenshtein": "git://github.com/cbaatz/damerau-levenshtein.git",
-    "strip-bom": "^2.0.0",
-    "unzip-stream": "^0.3.0"
+    "binarysearch": "1.0.0",
+    "strip-bom": "3.0.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0"
+    "chai": "4.2.0",
+    "mocha": "6.0.2"
   }
 }

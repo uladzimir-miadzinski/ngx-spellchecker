@@ -1,30 +1,20 @@
-/*
- * Copyright (c) 2016 José F. Maldonado
- * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-// Load dependencies.
 const fs = require('fs');
 const stripBOM = require('strip-bom');
 const Dictionary = require('./dictionary.js');
-
 const FOLDER_PATH = __dirname + '/dict';
 
-// Define module.
-var SpellChecker = {
+const SpellChecker = {
   /**
    * Create a dictionary from a file, which might be either a .dic or a .zip file.
    *
    * @param {String} fileName The name of the file from which read the word list.
    * @param {String} folderPath The path to the directory in which the file is located (optional).
-   * @param {Callback} callback A function to invoke when either the dictionary was created or an error was found.
+   * @param {function} callback A function to invoke when either the dictionary was created or an error was found.
    */
-  getDictionary: function (fileName, folderPath /*, callback*/) {
+  getDictionary: function (fileName, folderPath, callback) {
     try {
       // Initialize variables.
       var folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
-      var callback = arguments[arguments.length - 1];
       var dic_path = folder + '/' + fileName + '.dic';
       
       // Verify if the dictionary file exists.
@@ -39,7 +29,7 @@ var SpellChecker = {
       });
     } catch (err) {
       // Return error.
-      if (callback) callback('An unexpected error ocurred: ' + err, null);
+      if (callback) callback('An unexpected error occurred: ' + err, null);
     }
   },
   
@@ -47,7 +37,7 @@ var SpellChecker = {
    * Create a dictionary from a .dic file.
    *
    * @param {String} file_path The path of the file.
-   * @param {Callback} callback A function to invoke when either the dictionary was created or an error was found.
+   * @param {function} callback A function to invoke when either the dictionary was created or an error was found.
    */
   _readFile: function (file_path, callback) {
     fs.readFile(file_path, 'utf8', function (err, text) {
@@ -101,14 +91,12 @@ var SpellChecker = {
    *
    * @param {String} inputPath The path for the input file.
    * @param {String} outputPath The path to output (optional, by default is equals to the input file).
-   * @param {Callback} callback A function to invoke after finishing.
+   * @param {function} callback A function to invoke after finishing.
    */
-  normalizeDictionary: function (inputPath, outputPath /*, callback*/) {
+  normalizeDictionary: function (inputPath, outputPath, callback) {
     try {
       // Parses arguments
       if (!outputPath || typeof outputPath != 'string') outputPath = inputPath;
-      var callback = arguments.length > 0 ? arguments[arguments.length - 1] : function () {
-      };
       
       // Verify if the dictionary file exists.
       fs.exists(inputPath, function (exists) {
@@ -154,10 +142,9 @@ var SpellChecker = {
       });
     } catch (err) {
       // Return an error.
-      callback('An unexpected error ocurred: ' + err, false);
+      callback('An unexpected error occurred: ' + err, false);
     }
   }
 };
 
-// Export module.
 module.exports = SpellChecker;
