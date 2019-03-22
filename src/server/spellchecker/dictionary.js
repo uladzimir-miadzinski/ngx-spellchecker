@@ -2,10 +2,11 @@ const BinarySearch = require('binarysearch');
 const DL = require('./damerau-levenshtein')();
 
 // Use this object for consider accents and special characters when comparing UTF-8 strings.
-var Collator = new Intl.Collator(undefined, {'sensitivity': 'accent'});
+const Collator = new Intl.Collator(undefined, {'sensitivity': 'accent'});
 
-// The search for suggestions is going to be limited to words that are next to the position, in the word list, in which the word would be inserted.
-var SuggestRadius = 1000;
+// The search for suggestions is going to be limited to words that are next to the position,
+// in the word list, in which the word would be inserted.
+const SuggestRadius = 1000;
 
 /**
  * Creates an instance of Dictionary.
@@ -19,7 +20,7 @@ function Dictionary(name = '', wordlist) {
   this.name = `${name}_${(new Date()).getMilliseconds()}`;
   this.wordlist = [];
   this.setWordlist(wordlist);
-  this.clearRegexs();
+  this.clearRegexps();
 }
 
 /**
@@ -28,7 +29,7 @@ function Dictionary(name = '', wordlist) {
  * @return {number} The number of words in the dictionary.
  */
 Dictionary.prototype.getLength = function () {
-  return this.wordlist != null ? this.wordlist.length : 0;
+  return this.wordlist ? this.wordlist.length : 0;
 };
 
 /**
@@ -37,29 +38,28 @@ Dictionary.prototype.getLength = function () {
  * @param {string[]} wordlist A sorted array of strings.
  */
 Dictionary.prototype.setWordlist = function (wordlist) {
-  if (wordlist != null && Array.isArray(wordlist)) this.wordlist = wordlist;
+  if (wordlist && Array.isArray(wordlist)) this.wordlist = wordlist;
 };
 
 /**
  * Verify if a word is in the dictionary.
  *
- * @param {string} word A string.
- * @return {bool} 'true' if the word is in the dictionary, 'false' otherwise.
+ * @param {string} inputWord A string.
+ * @return {boolean} 'true' if the word is in the dictionary, 'false' otherwise.
  */
 Dictionary.prototype.spellCheck = function (inputWord) {
   const word = inputWord.toLowerCase();
-  // Verify if the word satifies one of the regular expressions.
-  for (var i = 0; i < this.regexs.length; i++) {
-    if (this.regexs[i].test(word)) return true;
+  
+  // Verify if the word satisfies one of the regular expressions.
+  for (let i = 0; i < this.regexps.length; i++) {
+    if (this.regexps[i].test(word)) return true;
   }
   
-  // Since the list is sorted, is more fast to do a binary search than 'this.wordlist.indexOf(word)'.
-  var res = BinarySearch(
+  return BinarySearch(
     this.wordlist, // Haystack
     word.toLowerCase(), // Needle
     Collator.compare // Comparison method
-  );
-  return res >= 0;
+  ) >= 0;
 };
 
 /**
@@ -82,6 +82,7 @@ Dictionary.prototype.isMisspelled = function (word) {
  */
 Dictionary.prototype.getSuggestions = function (word, limit, maxDistance) {
   let suggestions = [];
+  
   if (word && word.length > 0) {
     // Validate parameters.
     word = word.toLowerCase();
@@ -94,13 +95,13 @@ Dictionary.prototype.getSuggestions = function (word, limit, maxDistance) {
     
     // Initialize variables for store results.
     var res = [];
-    for (var i = 0; i <= maxDistance; i++) res.push([]);
+    for (let i = 0; i <= maxDistance; i++) res.push([]);
     
     // Search suggestions around the position in which the word would be inserted.
-    var k, dist;
-    for (var i = 0; i < SuggestRadius; i++) {
+    let k, dist;
+    for (let i = 0; i < SuggestRadius; i++) {
       // The index 'k' is going to be 0, 1, -1, 2, -2...
-      k = closest + (i % 2 != 0 ? ((i + 1) / 2) : (-i / 2));
+      k = closest + (i % 2 !== 0 ? ((i + 1) / 2) : (-i / 2));
       if (k >= 0 && k < this.wordlist.length) {
         dist = DL(word, this.wordlist[k].toLowerCase());
         if (dist <= maxDistance) res[dist].push(this.wordlist[k]);
@@ -108,13 +109,14 @@ Dictionary.prototype.getSuggestions = function (word, limit, maxDistance) {
     }
     
     // Prepare result.
-    for (var d = 0; d <= maxDistance && suggestions.length < limit; d++) {
-      var remaining = limit - suggestions.length;
+    for (let d = 0; d <= maxDistance && suggestions.length < limit; d++) {
+      const remaining = limit - suggestions.length;
       suggestions = suggestions.concat((res[d].length > remaining) ? res[d].slice(0, remaining) : res[d]);
     }
   }
+  
   return suggestions;
-}
+};
 
 /**
  * Verify if a word is misspelled and get a list of suggestions.
@@ -126,40 +128,40 @@ Dictionary.prototype.getSuggestions = function (word, limit, maxDistance) {
  */
 Dictionary.prototype.checkAndSuggest = function (word, limit, maxDistance) {
   // Get suggestions.
-  var suggestions = this.getSuggestions(word, limit + 1, maxDistance);
+  const suggestions = this.getSuggestions(word, limit + 1, maxDistance);
   
   // Prepare response.
   var res = {'misspelled': true, 'suggestions': []};
-  res.misspelled = suggestions.length == 0 || suggestions[0].toLowerCase() != word.toLowerCase();
+  res.misspelled = suggestions.length === 0 || suggestions[0].toLowerCase() !== word.toLowerCase();
   res.suggestions = suggestions;
   if (res.misspelled && (suggestions.length > limit)) res.suggestions = suggestions.slice(0, limit);
   if (!res.misspelled) res.suggestions = suggestions.slice(1, suggestions.length);
   
   // Verify if the word satifies one of the regular expressions.
   if (res.misspelled) {
-    for (var i = 0; i < this.regexs.length; i++) {
-      if (this.regexs[i].test(word)) res.misspelled = false;
+    for (let i = 0; i < this.regexps.length; i++) {
+      if (this.regexps[i].test(word)) res.misspelled = false;
     }
   }
   
   return res;
-}
+};
 
 /**
  * Adds a regular expression that will be used to verify if a word is valid even though is not on the dictionary.
  * Useful indicate that numbers, URLs and emails should not be marked as misspelled words.
  *
- * @param {RegEx} regexp A regular expression.
+ * @param {RegExp} regexp A regular expression.
  */
-Dictionary.prototype.addRegex = function (regex) {
-  this.regexs.push(regex);
+Dictionary.prototype.addRegex = function (regexp) {
+  this.regexps.push(regexp);
 };
 
 /**
  * Clear the list of regultar expressions used to verify if a word is valid even though is not on the dictionary.
  */
-Dictionary.prototype.clearRegexs = function () {
-  this.regexs = [];
+Dictionary.prototype.clearRegexps = function () {
+  this.regexps = [];
 };
 
 // Export class.

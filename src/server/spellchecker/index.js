@@ -44,8 +44,7 @@ const SpellChecker = {
       // Check for errors.
       if (!err) {
         // Create dictionary and return it.
-        var dictionary = new Dictionary(text.split('\n'));
-        callback(null, dictionary);
+        callback(null, new Dictionary(text.split('\n')));
       } else {
         // Return an error.
         callback("The dictionary file could not be read: " + err, null);
