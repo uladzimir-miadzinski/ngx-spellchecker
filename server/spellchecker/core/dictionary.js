@@ -1,5 +1,5 @@
 const BinarySearch = require('binarysearch');
-const DL = require('./damerau-levenshtein')();
+const DL = require('./../lib/damerau-levenshtein')();
 
 class Dictionary {
   

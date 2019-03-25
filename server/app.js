@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const spellchecker = require('./spellchecker');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const dictionariesToBeLoaded = [
   'en',
@@ -9,10 +10,11 @@ const dictionariesToBeLoaded = [
 ];
 const dictionaries = dictionariesToBeLoaded.map(dictionaryName => spellchecker.DictionaryLoader.getDictionarySync(dictionaryName));
 
+app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.get('/', function (req, res) {
+app.post('/', function (req, res) {
   res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
 });
 

@@ -1,4 +1,14 @@
-<label>
-  Spellchecker test
-  <input appSpellchecker>
-</label>
+<div class="d-flex align-content-center flex-column m-5">
+  
+    <label>Spellchecker
+      <input class="form-control" [formControl]="text" appSpellchecker>
+    </label>
+  
+    <button type="button" class="btn btn-primary" (click)="onClickCheckBtn()">Check</button>
+  
+    <label>Server Response
+      <textarea class="form-control server-response" cols="100" rows="25" disabled
+                [formControl]="serverResponse"></textarea>
+    </label>
+  
+</div>

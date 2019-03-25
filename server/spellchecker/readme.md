@@ -226,7 +226,7 @@ var SpellChecker = require('simple-spellchecker');
 var myDictionary = null;
 
 // Load dictionary.
-SpellChecker.getDictionary("en-US", "./node_modules/simple-spellchecker/dict", function(err, result) {
+SpellChecker.getDictionary("en-US", dictionaries, function(err, result) {
     if(!err) {
         myDictionary = result;
     }

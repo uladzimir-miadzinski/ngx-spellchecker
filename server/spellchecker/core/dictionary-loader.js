@@ -1,7 +1,7 @@
 const fs = require('fs');
 const stripBOM = require('strip-bom');
 const Dictionary = require('./dictionary.js');
-const FOLDER_PATH = __dirname + '/dict';
+const dictionariesPath = require('path').dirname(__dirname) + '\\dict';
 
 const DictionaryLoader = {
   /**
@@ -14,14 +14,14 @@ const DictionaryLoader = {
   getDictionary: function (fileName, folderPath, callback) {
     try {
       // Initialize variables.
-      const folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
-      const dic_path = folder + '/' + fileName + '.dic';
+      const folder = (!folderPath || typeof folderPath != 'string') ? dictionariesPath : folderPath;
+      const dictionaryPath = folder + '/' + fileName + '.dic';
       
       // Verify if the dictionary file exists.
-      fs.exists(dic_path, function (exists) {
+      fs.exists(dictionaryPath, function (exists) {
         if (exists) {
           // The file exists, read it.
-          DictionaryLoader._readFile(dic_path, callback);
+          DictionaryLoader._readFile(dictionaryPath, callback);
         } else {
           // The file do not exists, verify if the ZIP file exists.
           throw Error('No such dictionary');
@@ -54,7 +54,7 @@ const DictionaryLoader = {
   
   /**
    * Create a dictionary from a .dic file .
-   * Use CLI to normalize dictionaries first. It preven using .replace '\r' in this method
+   * Use CLI to normalize dict first. It preven using .replace '\r' in this method
    * node cli.js normalize "./dict/en.dic"
    *
    * @param {String} fileName The name of the file from which read the word list.
@@ -65,13 +65,13 @@ const DictionaryLoader = {
   getDictionarySync: function (fileName, folderPath = undefined) {
     try {
       // Initialize variables.
-      var folder = (!folderPath || typeof folderPath != 'string') ? FOLDER_PATH : folderPath;
-      var dic_path = folder + '/' + fileName + '.dic';
+      const folder = (!folderPath || typeof folderPath != 'string') ? dictionariesPath : folderPath;
+      const dictionaryPath = folder + '/' + fileName + '.dic';
       
       // Verify if the dictionary file exists.
-      if (fs.existsSync(dic_path)) {
+      if (fs.existsSync(dictionaryPath)) {
         // The file exists, read it.
-        const fileContent = fs.readFileSync(dic_path, 'utf8');
+        const fileContent = fs.readFileSync(dictionaryPath, 'utf8');
         const words = fileContent.split('\n').map(word => word.toLowerCase());
         return new Dictionary(fileName, words);
       } else {

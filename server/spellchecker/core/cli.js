@@ -5,7 +5,7 @@
  */
 
 // Load dependencies.
-const SpellChecker = require('./index.js');
+const SpellChecker = require('./../index.js');
 
 // Read action.
 var action = process.argv.length > 2? process.argv[2].toLowerCase() : '';
