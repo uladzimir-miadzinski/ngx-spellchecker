@@ -1,4 +1,4 @@
-import { SpellcheckerDirective } from './spellchecker.directive';
+import { SpellcheckerDirective } from '../spellchecker.directive';
 
 describe('SpellcheckerDirective', () => {
     it('should create an instance', () => {
