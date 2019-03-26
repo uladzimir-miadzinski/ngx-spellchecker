@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import {SpellcheckService} from './services/spellcheck.service';
+import {SpellcheckerService} from './services/spellchecker.service';
 import {FormControl} from '@angular/forms';
 import {Subscription} from 'rxjs';
 
@@ -19,14 +19,13 @@ export class AppComponent implements OnDestroy {
   subscriptions: Subscription[] = [];
   
   constructor(
-    private spellcheckService: SpellcheckService
+    private spellcheckService: SpellcheckerService
   ) {
   }
   
-  onClickCheckBtn(): void {
-    this.subscriptions.push(this.spellcheckService.check(this.text.value).subscribe(response => {
-      this.serverResponse.setValue(JSON.stringify(response, null, 2));
-    }));
+  async onClickCheckBtn() {
+    const response = await this.spellcheckService.check(this.text.value);
+    this.serverResponse.setValue(JSON.stringify(response, null, 2));
   }
   
   ngOnDestroy(): void {

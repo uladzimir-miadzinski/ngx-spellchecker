@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { SpellcheckService } from '../spellcheck.service';
+import { SpellcheckerService } from '../spellchecker.service';
 
-describe('SpellcheckService', () => {
+describe('SpellcheckerService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: SpellcheckService = TestBed.get(SpellcheckService);
+    const service: SpellcheckerService = TestBed.get(SpellcheckerService);
     expect(service).toBeTruthy();
   });
 });

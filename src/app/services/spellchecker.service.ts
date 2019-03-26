@@ -7,13 +7,13 @@ const baseUrl = 'http://localhost:2999/';
 @Injectable({
   providedIn: 'root'
 })
-export class SpellcheckService {
+export class SpellcheckerService {
   
   constructor(private http: HttpClient) {
   }
   
-  check(text): Observable<any> {
-    return this.http.post(baseUrl, {text});
+  async check(text): Promise<any> {
+    return await this.http.post(baseUrl, {text}).toPromise();
   }
   
 }
