@@ -18,8 +18,9 @@ export class SpellcheckerDirective implements OnInit {
   ngOnInit(): void {
     this.spellcheckerErrorStyle = `
       text-decoration:none;
+      background: #f8d2d4;
       border-bottom: 1px solid #e00;
-      box-shadow: inset 0 -1px 0 #ef8b80;
+      box-shadow: inset 0 -1px 0 #e00;
       color: inherit;
       transition: background 0.1s cubic-bezier(.33,.66,.66,1);`;
   }
@@ -33,7 +34,7 @@ export class SpellcheckerDirective implements OnInit {
     const styleInject = `
       <style>
       .spellchecker-error {
-       ${this.spellcheckerErrorStyle}
+        ${this.spellcheckerErrorStyle}
       }
       </style>`;
     const caretOffset = getCaretCharacterOffsetWithin(element);
