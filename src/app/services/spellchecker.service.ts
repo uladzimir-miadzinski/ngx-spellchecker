@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
 
 const baseUrl = 'http://localhost:2999/';
 
@@ -12,7 +11,7 @@ export class SpellcheckerService {
   constructor(private http: HttpClient) {
   }
   
-  async check(text): Promise<any> {
+  async checkText(text: string): Promise<any> {
     return await this.http.post(baseUrl, {text}).toPromise();
   }
   

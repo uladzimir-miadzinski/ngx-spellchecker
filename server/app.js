@@ -6,7 +6,8 @@ const cors = require('cors');
 
 const dictionariesToBeLoaded = [
   'en',
-  'en_MED'
+  'en_MED',
+  'special-chars'
 ];
 const dictionaries = dictionariesToBeLoaded.map(dictionaryName => spellchecker.DictionaryLoader.getDictionarySync(dictionaryName));
 

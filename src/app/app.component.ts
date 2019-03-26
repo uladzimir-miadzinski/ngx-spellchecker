@@ -1,6 +1,6 @@
 import {Component, OnDestroy} from '@angular/core';
 import {SpellcheckerService} from './services/spellchecker.service';
-import {FormControl} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -9,23 +9,22 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnDestroy {
-  
-  text = new FormControl(
-    'Helo, my namei is Vova and I hav jusd developid aplicateon to chek speling of mispeled worts and medikal terms, ' +
-    'such as scotophobicalli, scoyrge, Coladern, unit-eosenophil, aestetician that are misspelled, ' +
-    'and correct words: afelimomab, helminthophobes, unit-granulocyte-macrophage');
-  serverResponse = new FormControl('');
+  form = this.fb.group({
+    text: [''],
+    serverResponse: ['']
+  });
   
   subscriptions: Subscription[] = [];
   
   constructor(
-    private spellcheckService: SpellcheckerService
+    private spellcheckService: SpellcheckerService,
+    private fb: FormBuilder
   ) {
   }
   
   async onClickCheckBtn() {
-    const response = await this.spellcheckService.check(this.text.value);
-    this.serverResponse.setValue(JSON.stringify(response, null, 2));
+    const response = await this.spellcheckService.checkText(this.form.controls.text.value);
+    this.form.patchValue({serverResponse: JSON.stringify(response, null, 2)});
   }
   
   ngOnDestroy(): void {

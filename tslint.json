@@ -4,6 +4,14 @@
     "codelyzer"
   ],
   "rules": {
+    "quotemark": [
+      true,
+      "single",
+      "double",
+      "jsx-single",
+      "jsx-double"
+    ],
+    "no-trailing-whitespace": false,
     "array-type": false,
     "arrow-parens": false,
     "deprecation": {
@@ -67,5 +75,10 @@
     "use-pipe-transform-interface": true,
     "component-class-suffix": true,
     "directive-class-suffix": true
+  },
+  "linterOptions": {
+    "exclude": [
+      "server"
+    ]
   }
 }

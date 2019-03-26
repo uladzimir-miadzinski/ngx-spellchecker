@@ -1,0 +1,9 @@
+.text-input {
+  height: auto;
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.spellchecker-error {
+  color: red;
+}
