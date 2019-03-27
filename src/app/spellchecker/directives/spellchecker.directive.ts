@@ -15,7 +15,7 @@ interface SpellcheckerOptions {
 })
 export class SpellcheckerDirective implements OnInit {
   @Input()
-  timeout = 1000;
+  timeout = 500;
   
   @Input()
   options: SpellcheckerOptions = {
@@ -32,6 +32,13 @@ export class SpellcheckerDirective implements OnInit {
   keyUpTimer: any;
   actualText: string;
   
+  getWrapper() {
+    const end = '</span>';
+    const start = '<span class="spellchecker-error">';
+    const length = end.length + start.length;
+    return {end, length, start};
+  }
+  
   constructor(
     private el: ElementRef,
     private spellcheckService: SpellcheckerService
@@ -44,36 +51,72 @@ export class SpellcheckerDirective implements OnInit {
   get errorStyle() {
     return `
     .spellchecker-error {
-      ${Object.entries(this.options.style).reduce((acc, style) => acc + `${style[0]}:${style[1]};`, '')}
+      ${Object.entries(this.options.style).reduce((acc, [key, value]) => acc + `${key}:${value};`, '')}
     }
     `;
   }
   
-  @HostListener('keyup')
-  async onKeyUp() {
-    this.actualText = (this.el.nativeElement as HTMLInputElement).innerText || '';
-    
+  @HostListener('keydown')
+  onKeyDown() {
     if (this.keyUpTimer) {
       clearTimeout(this.keyUpTimer);
     }
+  }
+  
+  @HostListener('keyup')
+  async onKeyUp() {
+    this.actualText = (this.el.nativeElement as HTMLInputElement).innerText;
     
     this.keyUpTimer = setTimeout(async () => {
-      const element = this.el.nativeElement as HTMLInputElement;
-      const textToSend = element.innerText || '';
+      const el = this.el.nativeElement as HTMLInputElement;
+      const textToSend = el.innerText || '';
       const response = await this.spellcheckService.checkText(textToSend);
-      const styleInject = `
-      <style>
-      ${this.errorStyle}
-      </style>`;
-      const caretOffset = getCaretCharacterOffsetWithin(element);
-      //if (this.actualText !== textToSend) {
-      const syncWritingText = this.actualText.slice(textToSend.length);
-      console.log(syncWritingText);
-      console.log(textToSend);
-      //}
-      element.innerHTML = `${response.spelledText}${syncWritingText}${styleInject}`;
-      setCaretPosition(element, caretOffset);
+      const styleInject = `<style>${this.errorStyle}</style>`;
+      const caretOffset = getCaretCharacterOffsetWithin(el);
+      const spelledText = this.spellWords(response.misspelledWords);
+      setCaretPosition(el, caretOffset);
     }, this.timeout);
+  }
+  
+  spellWords(misspelledWords) {
+    const el = this.el.nativeElement as HTMLInputElement;
+    const text = el.innerText;
     
+    if (misspelledWords.length) {
+      let textCursor = 0;
+      let wordCursor = 0;
+      const wrapper = this.getWrapper();
+      let prevTextCursor = 0;
+      
+      while (textCursor <= text.length) {
+        prevTextCursor = textCursor;
+        textCursor = text.indexOf(misspelledWords[wordCursor].word, prevTextCursor);
+        
+        let diff = 0;
+        if (textCursor < wrapper.start.length) {
+          diff = wrapper.start.length - textCursor;
+        }
+        
+        const sliceStart = textCursor - wrapper.start.length;
+        
+        const textBeforeWord = sliceStart < 0 ? '' : text.slice(sliceStart, sliceStart + wrapper.start.length);
+        const isErrorWrapperBefore = textBeforeWord === '' ? false : textBeforeWord === wrapper.start.slice(diff);
+        
+        if (textCursor >= 0 && !isErrorWrapperBefore) {
+          const spelledWord = `${wrapper.start}${misspelledWords[wordCursor].word}${wrapper.end}`;
+          el.innerHTML = el.innerHTML.replace(misspelledWords[wordCursor].word, spelledWord);
+        }
+        
+        wordCursor++;
+        
+        if (wordCursor === misspelledWords.length) {
+          textCursor = text.length + 1;
+        }
+      }
+      
+      return text;
+    } else {
+      return '';
+    }
   }
 }

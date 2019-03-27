@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.post('/', (req: Request, res: Response) => {
   setTimeout(() => {
     res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
-  }, 5000);
+  }, 2500);
 });
 
 app.listen(2999, () => {

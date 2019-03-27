@@ -32,72 +32,13 @@ const textCheckAndSuggest = (text, dictionaries) => {
   const multipleSpacesRegexp = /\s+/g;
   const cleanWords = text.replace(punctuationRegexp, '').replace(multipleSpacesRegexp, ' ');
   const words = cleanWords.split(' ').map(word => wordCheckAndSuggest(word, dictionaries));
-  const misspelledWords = words.filter(item => item.isMisspelled).map(item => item.word);
-  
-  const getWrapper = () => {
-    const end = '</span>';
-    const start = '<span class="spellchecker-error">';
-    const length = end.length + start.length;
-    return {end, length, start};
-  };
-  
-  let spelledText = text;
-  
-  console.log(misspelledWords);
-  
-  if (misspelledWords.length) {
-    let textCursor = 0;
-    let wordCursor = 0;
-    let wrapper = getWrapper();
-    let prevTextCursor = 0;
-    
-    console.log(`text.length: ${text.length}`);
-    
-    while (textCursor <= spelledText.length) {
-      prevTextCursor = textCursor;
-      
-      console.log(`spelledText: ${spelledText}`);
-      console.log(`misspelledWords[wordCursor]: ${misspelledWords[wordCursor]}`);
-      
-      textCursor = spelledText.indexOf(misspelledWords[wordCursor], prevTextCursor);
-      
-      console.log(`textCursor: ${textCursor}`);
-      console.log(`wrapper.start.length: ${wrapper.start.length}`);
-      
-      let diff = 0;
-      if (textCursor < wrapper.start.length) {
-        diff = wrapper.start.length - textCursor;
-      }
-      console.log(`diff: ${diff}`);
-      
-      let sliceStart = textCursor - wrapper.start.length;
-      console.log(`sliceStart: ${sliceStart}`);
-      
-      let textBeforeWord = sliceStart < 0 ? '' : spelledText.slice(sliceStart, sliceStart + wrapper.start.length);
-      let isErrorWrapperBefore = textBeforeWord === '' ? false : textBeforeWord === wrapper.start.slice(diff);
-      console.log(`textBeforeWord: ${textBeforeWord}`);
-      console.log(`isErrorWrapperBefore: ${isErrorWrapperBefore}`);
-      
-      console.log(wrapper.start.slice(diff), misspelledWords[wordCursor]);
-      console.log(isErrorWrapperBefore);
-      console.log(spelledText, textCursor);
-      console.log('');
-      
-      if (textCursor >= 0 && !isErrorWrapperBefore) {
-        spelledText = spelledText.slice(0, textCursor) +
-          wrapper.start + misspelledWords[wordCursor] + wrapper.end +
-          spelledText.slice(textCursor + misspelledWords[wordCursor].length);
-      }
-      wordCursor++;
-      if (wordCursor === misspelledWords.length) {
-        textCursor = spelledText.length + 1;
-      }
-    }
-  }
+  const misspelledWords = words.filter(item => item.isMisspelled).map(item => ({
+    suggestions: item.suggestions,
+    word: item.word,
+  }));
   
   return {
-    spelledText,
-    words,
+    misspelledWords,
   };
 };
 

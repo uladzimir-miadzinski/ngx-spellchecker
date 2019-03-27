@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.post('/', function (req, res) {
     setTimeout(function () {
         res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
-    }, 5000);
+    }, 2500);
 });
 app.listen(2999, function () {
     console.log('Example app listening on port 2999!');
