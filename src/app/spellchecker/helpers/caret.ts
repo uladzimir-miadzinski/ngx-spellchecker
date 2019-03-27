@@ -43,11 +43,8 @@ export function getCaretPosition() {
   return -1;
 }
 
-export function setCaretPos(el, sPos)
+export function setCaretPosition(el, sPos)
 {
-  /*range = document.createRange();
-  range.setStart(el.firstChild, sPos);
-  range.setEnd  (el.firstChild, sPos);*/
   var charIndex = 0, range = document.createRange();
   range.setStart(el, 0);
   range.collapse(true);

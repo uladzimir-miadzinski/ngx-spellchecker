@@ -1,6 +1,8 @@
+import {Response, Request} from 'express';
+
 const express = require('express');
 const app = express();
-const spellchecker = require('./spellchecker');
+const spellchecker = require('./../spellchecker');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -15,10 +17,12 @@ app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.post('/', function (req, res) {
-  res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
+app.post('/', (req: Request, res: Response) => {
+  setTimeout(() => {
+    res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
+  }, 5000);
 });
 
-app.listen(2999, function () {
+app.listen(2999, () => {
   console.log('Example app listening on port 2999!');
 });

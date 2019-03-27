@@ -1,4 +1,4 @@
-export const debounce = (delay: number = 1500): MethodDecorator => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+export const debounce = (delay: number = 1000): MethodDecorator => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
   const original = descriptor.value;
   
   descriptor.value = function(...args) {
