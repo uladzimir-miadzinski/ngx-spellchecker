@@ -1,6 +1,7 @@
 import {Directive, ElementRef, HostListener, Input, OnInit} from '@angular/core';
 import {SpellcheckerService} from '../../services/spellchecker.service';
 import {getCaretCharacterOffsetWithin, setCaretPosition} from '../helpers/caret';
+import {debounce} from '../helpers/delay';
 
 interface ErrorStyle {
   [key: string]: string;
@@ -56,67 +57,59 @@ export class SpellcheckerDirective implements OnInit {
     `;
   }
   
-  @HostListener('keydown')
-  onKeyDown() {
-    if (this.keyUpTimer) {
-      clearTimeout(this.keyUpTimer);
+  @HostListener('keypress')
+  @debounce()
+  async onKeyPress() {
+    const el = this.el.nativeElement as HTMLInputElement;
+    const textToSend = el.innerText || '';
+    const response = await this.spellcheckService.checkText(textToSend);
+    
+    // avoid calc
+    if (el.innerText.length === textToSend.length) {
+      const caretOffset = getCaretCharacterOffsetWithin(el);
+      this.spellWords(response.misspelledWords, textToSend);
+      setCaretPosition(el, caretOffset);
     }
   }
   
-  @HostListener('keyup')
-  async onKeyUp() {
-    this.actualText = (this.el.nativeElement as HTMLInputElement).innerText;
-    
-    this.keyUpTimer = setTimeout(async () => {
-      const el = this.el.nativeElement as HTMLInputElement;
-      const textToSend = el.innerText || '';
-      const response = await this.spellcheckService.checkText(textToSend);
-      const styleInject = `<style>${this.errorStyle}</style>`;
-      const caretOffset = getCaretCharacterOffsetWithin(el);
-      const spelledText = this.spellWords(response.misspelledWords);
-      setCaretPosition(el, caretOffset);
-    }, this.timeout);
-  }
-  
-  spellWords(misspelledWords) {
+  spellWords(misspelledWords, ofText) {
     const el = this.el.nativeElement as HTMLInputElement;
-    const text = el.innerText;
+    const styleInject = `<style>${this.errorStyle}</style>`;
+    const inputText = el.innerText;
+    let text = inputText;
+    let outputText = '';
     
     if (misspelledWords.length) {
       let textCursor = 0;
       let wordCursor = 0;
       const wrapper = this.getWrapper();
-      let prevTextCursor = 0;
       
-      while (textCursor <= text.length) {
-        prevTextCursor = textCursor;
-        textCursor = text.indexOf(misspelledWords[wordCursor].word, prevTextCursor);
-        
-        let diff = 0;
-        if (textCursor < wrapper.start.length) {
-          diff = wrapper.start.length - textCursor;
+      while (text.length > 0) {
+        // avoid calc
+        if (ofText.length !== el.innerText.length) {
+          return;
         }
         
-        const sliceStart = textCursor - wrapper.start.length;
+        textCursor = 0;
         
-        const textBeforeWord = sliceStart < 0 ? '' : text.slice(sliceStart, sliceStart + wrapper.start.length);
-        const isErrorWrapperBefore = textBeforeWord === '' ? false : textBeforeWord === wrapper.start.slice(diff);
+        const fullWord = new RegExp(`\\b${misspelledWords[wordCursor].word}\\b`);
+        textCursor = text.search(fullWord);
         
-        if (textCursor >= 0 && !isErrorWrapperBefore) {
+        if (textCursor >= 0) {
           const spelledWord = `${wrapper.start}${misspelledWords[wordCursor].word}${wrapper.end}`;
-          el.innerHTML = el.innerHTML.replace(misspelledWords[wordCursor].word, spelledWord);
+          outputText += `${text.slice(0, textCursor)}${spelledWord}`;
+          text = text.slice(textCursor + misspelledWords[wordCursor].word.length);
         }
         
         wordCursor++;
-        
         if (wordCursor === misspelledWords.length) {
-          textCursor = text.length + 1;
+          break;
         }
       }
       
-      return text;
-    } else {
-      return '';
+      if (el.innerText.length === ofText.length) {
+        el.innerHTML = el.innerText.replace(inputText, outputText + text + styleInject);
+      }
     }
   }
 }

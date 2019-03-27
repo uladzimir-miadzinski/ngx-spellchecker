@@ -32,7 +32,7 @@ const textCheckAndSuggest = (text, dictionaries) => {
   const multipleSpacesRegexp = /\s+/g;
   const cleanWords = text.replace(punctuationRegexp, '').replace(multipleSpacesRegexp, ' ');
   const words = cleanWords.split(' ').map(word => wordCheckAndSuggest(word, dictionaries));
-  const misspelledWords = words.filter(item => item.isMisspelled).map(item => ({
+  const misspelledWords = words.filter(item => item.isMisspelled).filter(item => item.word !== '').map(item => ({
     suggestions: item.suggestions,
     word: item.word,
   }));
