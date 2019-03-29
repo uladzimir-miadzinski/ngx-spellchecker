@@ -1,18 +1,11 @@
-<form [formGroup]="form">
+<form>
   <div class="d-flex align-content-center flex-column m-5">
     
     <div
       class="form-control text-input mb-2"
       contenteditable="true"
       appSpellchecker
-      [innerText]="form.get('text').value"
     ></div>
-    
-    <button type="button" class="btn btn-primary" (click)="onClickCheckBtn()">Check</button>
-    
-    <label>Server Response
-      <textarea class="form-control server-response" cols="100" rows="25" formControlName="serverResponse"></textarea>
-    </label>
   
   </div>
 </form>

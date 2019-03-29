@@ -18,9 +18,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.post('/', (req: Request, res: Response) => {
-  setTimeout(() => {
-    res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
-  }, 2500);
+  res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
 });
 
 app.listen(2999, () => {

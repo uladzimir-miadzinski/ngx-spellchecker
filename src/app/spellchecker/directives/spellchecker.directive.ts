@@ -3,18 +3,33 @@ import {SpellcheckerService} from '../../services/spellchecker.service';
 import {getCaretCharacterOffsetWithin, setCaretPosition} from '../helpers/caret';
 import {debounce} from '../helpers/delay';
 
-interface ErrorStyle {
+interface StyleOptions {
   [key: string]: string;
 }
 
 interface SpellcheckerOptions {
-  style: ErrorStyle;
+  style: StyleOptions;
 }
 
 @Directive({
   selector: '[appSpellchecker]',
 })
 export class SpellcheckerDirective implements OnInit {
+  
+  constructor(
+    private el: ElementRef,
+    private spellcheckService: SpellcheckerService
+  ) {
+  }
+  
+  get errorStyle() {
+    return `
+    .spellchecker-error {
+      ${Object.entries(this.options.style).reduce((acc, [key, value]) => acc + `${key}:${value};`, '')}
+    }
+    `;
+  }
+  
   @Input()
   timeout = 500;
   
@@ -30,31 +45,25 @@ export class SpellcheckerDirective implements OnInit {
     }
   };
   
-  keyUpTimer: any;
-  actualText: string;
-  
-  getWrapper() {
+  static getWrapper(suggestions: string[]) {
     const end = '</span>';
-    const start = '<span class="spellchecker-error">';
+    const start = `<span class="spellchecker-error" data-suggest="${suggestions}">`;
     const length = end.length + start.length;
     return {end, length, start};
   }
   
-  constructor(
-    private el: ElementRef,
-    private spellcheckService: SpellcheckerService
-  ) {
+  static getWrappedWord(word: string, suggestions: string[]): string {
+    const wrapper = SpellcheckerDirective.getWrapper(suggestions);
+    return `${wrapper.start}${word}${wrapper.end}`;
+  }
+  
+  static getIndexOfWordInText(word: string, text: string) {
+    const fullWord = new RegExp(`\\b${word}\\b`, 'u');
+    return text.search(fullWord);
   }
   
   ngOnInit(): void {
-  }
-  
-  get errorStyle() {
-    return `
-    .spellchecker-error {
-      ${Object.entries(this.options.style).reduce((acc, [key, value]) => acc + `${key}:${value};`, '')}
-    }
-    `;
+    (this.el.nativeElement as HTMLInputElement).setAttribute('spellcheck', 'false');
   }
   
   @HostListener('keypress')
@@ -72,7 +81,16 @@ export class SpellcheckerDirective implements OnInit {
     }
   }
   
-  spellWords(misspelledWords, ofText) {
+  
+  @HostListener('contextmenu', ['$event'])
+  onContextMenu(e: MouseEvent) {
+    const suggestions = (e.target as HTMLSpanElement).dataset.suggest.split(',');
+    console.log(e);
+    console.log(suggestions);
+    console.log('contextmenu');
+  }
+  
+  spellWords(misspelledWords, textWasSent) {
     const el = this.el.nativeElement as HTMLInputElement;
     const styleInject = `<style>${this.errorStyle}</style>`;
     const inputText = el.innerText;
@@ -82,21 +100,17 @@ export class SpellcheckerDirective implements OnInit {
     if (misspelledWords.length) {
       let textCursor = 0;
       let wordCursor = 0;
-      const wrapper = this.getWrapper();
       
       while (text.length > 0) {
         // avoid calc
-        if (ofText.length !== el.innerText.length) {
+        if (textWasSent.length !== el.innerText.length) {
           return;
         }
         
-        textCursor = 0;
-        
-        const fullWord = new RegExp(`\\b${misspelledWords[wordCursor].word}\\b`);
-        textCursor = text.search(fullWord);
+        textCursor = SpellcheckerDirective.getIndexOfWordInText(misspelledWords[wordCursor].word, text);
         
         if (textCursor >= 0) {
-          const spelledWord = `${wrapper.start}${misspelledWords[wordCursor].word}${wrapper.end}`;
+          const spelledWord = SpellcheckerDirective.getWrappedWord(misspelledWords[wordCursor].word, misspelledWords[wordCursor].suggestions);
           outputText += `${text.slice(0, textCursor)}${spelledWord}`;
           text = text.slice(textCursor + misspelledWords[wordCursor].word.length);
         }
@@ -107,8 +121,12 @@ export class SpellcheckerDirective implements OnInit {
         }
       }
       
-      if (el.innerText.length === ofText.length) {
-        el.innerHTML = el.innerText.replace(inputText, outputText + text + styleInject);
+      // `text` - contains rest of the text if there is no mistakes
+      const newInnerHtml = el.innerText.replace(inputText, outputText + text) + styleInject;
+      
+      // avoid inserting if user continue typing
+      if (el.innerText.length === textWasSent.length) {
+        el.innerHTML = newInnerHtml;
       }
     }
   }

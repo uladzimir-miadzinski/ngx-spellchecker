@@ -15,9 +15,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.post('/', function (req, res) {
-    setTimeout(function () {
-        res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
-    }, 2500);
+    res.send(spellchecker.CheckEngine.textCheckAndSuggest(req.body.text, dictionaries));
 });
 app.listen(2999, function () {
     console.log('Example app listening on port 2999!');
