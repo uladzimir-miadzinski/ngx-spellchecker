@@ -3,12 +3,22 @@ import {SpellcheckerService} from '../../services/spellchecker.service';
 import {getCaretCharacterOffsetWithin, setCaretPosition} from '../helpers/caret';
 import {debounce} from '../helpers/delay';
 
+enum NodeType {
+  Div = 1,
+  Text = 3
+}
+
 interface StyleOptions {
   [key: string]: string;
 }
 
 interface SpellcheckerOptions {
   style: StyleOptions;
+}
+
+interface Misspelled {
+  suggestions: string[];
+  word: string;
 }
 
 @Directive({
@@ -45,25 +55,45 @@ export class SpellcheckerDirective implements OnInit {
     }
   };
   
-  static getWrapper(suggestions: string[]) {
+  getWrapper(suggestions: string[] = []) {
     const end = '</span>';
     const start = `<span class="spellchecker-error" data-suggest="${suggestions}">`;
     const length = end.length + start.length;
     return {end, length, start};
   }
   
-  static getWrappedWord(word: string, suggestions: string[]): string {
+  getWrappedWord(word: string, suggestions: string[]): string {
     const wrapper = SpellcheckerDirective.getWrapper(suggestions);
     return `${wrapper.start}${word}${wrapper.end}`;
   }
   
-  static getIndexOfWordInText(word: string, text: string) {
+  getIndexesOfWordInText(word: string = '', text: string = '') {
     const fullWord = new RegExp(`\\b${word}\\b`, 'u');
     return text.search(fullWord);
   }
   
+  getNodeValue(node: ChildNode) {
+    const el = node as HTMLElement;
+    
+    return (el.nodeType === NodeType.Div)
+      ? el.innerText
+      : el.nodeType === NodeType.Text
+        ? el.nodeValue
+        : el.textContent;
+  }
+  
+  getNodeWithMisspelledText(nodes: ChildNode[], word) {
+    return nodes.find((node: ChildNode) => {
+      return this.getIndexesOfWordInText(word, this.getNodeValue(node)) >= 0;
+    });
+  }
+  
   ngOnInit(): void {
-    (this.el.nativeElement as HTMLInputElement).setAttribute('spellcheck', 'false');
+    const el = this.el.nativeElement as HTMLInputElement;
+    const styleInject = document.createElement('style');
+    styleInject.innerHTML = this.errorStyle;
+    el.after(styleInject);
+    el.setAttribute('spellcheck', 'false');
   }
   
   @HostListener('keypress')
@@ -76,8 +106,9 @@ export class SpellcheckerDirective implements OnInit {
     // avoid calc
     if (el.innerText.length === textToSend.length) {
       const caretOffset = getCaretCharacterOffsetWithin(el);
-      this.spellWords(response.misspelledWords, textToSend);
-      setCaretPosition(el, caretOffset);
+      this.spellWordsHtml(response.misspelledWords, textToSend);
+      // this.spellWords(response.misspelledWords, textToSend);
+      // setCaretPosition(el, caretOffset);
     }
   }
   
@@ -85,16 +116,38 @@ export class SpellcheckerDirective implements OnInit {
   @HostListener('contextmenu', ['$event'])
   onContextMenu(e: MouseEvent) {
     const suggestions = (e.target as HTMLSpanElement).dataset.suggest.split(',');
+    const caretOffset = getCaretCharacterOffsetWithin((e.target as HTMLSpanElement));
+    console.log(caretOffset);
     console.log(e);
     console.log(suggestions);
     console.log('contextmenu');
   }
   
+  spellWordsHtml(misspelledWords, textWasSent) {
+    const el = this.el.nativeElement as HTMLInputElement;
+    const {childNodes} = el;
+    const nodes = Array.from(childNodes);
+    misspelledWords.forEach((misspelled: Misspelled) => {
+      const nodeWithMisspelledWord = this.getNodeWithMisspelledText(nodes, misspelled.word);
+      this.spellWord(misspelled.word, misspelled.suggestions, nodeWithMisspelledWord);
+      console.dir(nodeWithMisspelledWord);
+    });
+    console.log(childNodes);
+  }
+  
+  spellWord(word = '', suggestions = [], node) {
+    const nodeValue = this.getNodeValue(node);
+    const indexesOfWord = this.getIndexesOfWordInText(word, nodeValue);
+    const wrapper = this.getWrapper(suggestions);
+    const isWrappedBefore = this.getIndexesOfWordInText(`${wrapper.start}${word}`, nodeValue);
+    
+  }
+  
   spellWords(misspelledWords, textWasSent) {
     const el = this.el.nativeElement as HTMLInputElement;
-    const styleInject = `<style>${this.errorStyle}</style>`;
-    const inputText = el.innerText;
-    let text = inputText;
+    const innerHtml = el.innerHTML;
+    console.log(innerHtml);
+    let text = innerHtml;
     let outputText = '';
     
     if (misspelledWords.length) {
@@ -107,10 +160,21 @@ export class SpellcheckerDirective implements OnInit {
           return;
         }
         
-        textCursor = SpellcheckerDirective.getIndexOfWordInText(misspelledWords[wordCursor].word, text);
+        textCursor = this.getIndexesOfWordInText(misspelledWords[wordCursor].word, text);
+        const children = Array.from(el.children);
+        const errorSpell = !!children.find(span => {
+          console.group('children span if');
+          console.dir(span);
+          console.dir((span as HTMLSpanElement).innerText);
+          console.dir(misspelledWords[wordCursor].word);
+          console.groupEnd();
+          return span.className === 'spellchecker-error' && this.getIndexesOfWordInText(misspelledWords[wordCursor].word, (span as HTMLSpanElement).innerText) >= 0;
+        });
         
-        if (textCursor >= 0) {
-          const spelledWord = SpellcheckerDirective.getWrappedWord(misspelledWords[wordCursor].word, misspelledWords[wordCursor].suggestions);
+        console.log(`errorSpell: ${errorSpell}`);
+        
+        if (textCursor >= 0 && !errorSpell) {
+          const spelledWord = this.getWrappedWord(misspelledWords[wordCursor].word, misspelledWords[wordCursor].suggestions);
           outputText += `${text.slice(0, textCursor)}${spelledWord}`;
           text = text.slice(textCursor + misspelledWords[wordCursor].word.length);
         }
@@ -122,7 +186,8 @@ export class SpellcheckerDirective implements OnInit {
       }
       
       // `text` - contains rest of the text if there is no mistakes
-      const newInnerHtml = el.innerText.replace(inputText, outputText + text) + styleInject;
+      // try to replace full text, if cant then user continue changing text
+      const newInnerHtml = outputText + text;
       
       // avoid inserting if user continue typing
       if (el.innerText.length === textWasSent.length) {
