@@ -5,6 +5,6 @@
   overflow-y: scroll;
 }
 
-.spellchecker-error {
+mark.tf-spellchecker-err {
   color: red;
 }

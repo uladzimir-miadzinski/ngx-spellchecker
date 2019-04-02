@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 4199",
+    "start": "npm build && ng serve --port 4199",
     "start:server": "cd server && npm start",
     "build": "ng build",
     "test": "ng test",
@@ -24,6 +24,7 @@
     "core-js": "^2.5.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "ng-spell-check": "^1.0.16",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"
