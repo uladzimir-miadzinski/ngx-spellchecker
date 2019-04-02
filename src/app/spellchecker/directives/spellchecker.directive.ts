@@ -2,11 +2,15 @@ import {Directive, ElementRef, HostListener, Input, OnInit} from '@angular/core'
 import {SpellcheckerService} from '../../services/spellchecker.service';
 import {getCaretCharacterOffsetWithin, setCaretPosition} from '../helpers/caret';
 import {debounce} from '../helpers/delay';
-import {__await} from 'tslib';
 
 enum NodeType {
   Div = 1,
   Text = 3
+}
+
+enum KeyboardButtons {
+  Delete = 46,
+  Backspace = 8
 }
 
 interface StyleOptions {
@@ -42,13 +46,13 @@ export class SpellcheckerDirective implements OnInit {
   }
   
   @Input()
-  timeout = 500;
+  timeout = 1000;
   
   @Input()
   options: SpellcheckerOptions = {
     style: {
       'text-decoration': 'none',
-      'background': 'transparent', //'#f8d2d4',
+      'background': 'transparent', // '#f8d2d4',
       'border-bottom': '1px solid #e00',
       'box-shadow': 'inset 0 -1px 0 #e00',
       'color': 'inherit',
@@ -82,16 +86,36 @@ export class SpellcheckerDirective implements OnInit {
   @HostListener('keypress')
   @debounce()
   async onKeyPress() {
+    await this.spellcheck();
+  }
+  
+  @HostListener('keyup', ['$event'])
+  async onKeyUp(e) {
+    if (e.which === KeyboardButtons.Backspace || e.which === KeyboardButtons.Delete) {
+      (this.el.nativeElement as HTMLInputElement).dispatchEvent(new Event('keypress'));
+    }
+  }
+  
+  @HostListener('focus')
+  @debounce()
+  async onFocus() {
+    await this.spellcheck();
+  }
+  
+  async spellcheck() {
     const el = this.el.nativeElement as HTMLInputElement;
     const textToSend = el.innerText || '';
     const response = await this.spellcheckService.checkText(textToSend);
     await this.spellWordsHtml(response.misspelledWords, el);
   }
   
-  
   @HostListener('contextmenu', ['$event'])
   onContextMenu(e: MouseEvent) {
-    //const suggestions = (e.target as HTMLSpanElement).dataset.suggest.split(',');
+    const dataSuggest = (e.target as HTMLSpanElement).dataset.suggest;
+    if (dataSuggest) {
+      const suggestions = dataSuggest.split(',');
+      console.log(suggestions);
+    }
   }
   
   async spellWordsHtml(misspelledWords, el: HTMLInputElement) {
@@ -113,9 +137,11 @@ export class SpellcheckerDirective implements OnInit {
         return;
       } else if (node.nodeName === 'MARK') {
         // value inside <mark> was changed, need to update <mark> node with new spell, or correct
-        const corrections = await this.spellcheckService.checkText(node.textContent);
+        const corrections: Misspelled[] = await this.spellcheckService.checkText(node.textContent);
         if (corrections.length) {
           // word with another errors
+          node.dataset.missplled = corrections[0].word;
+          node.dataset.suggest = corrections[0].suggestions;
         } else {
           // word without errors
           const caret = getCaretCharacterOffsetWithin(this.el.nativeElement as HTMLInputElement);
@@ -147,8 +173,6 @@ export class SpellcheckerDirective implements OnInit {
       node.parentNode.replaceChild(frag, node);
       
       setCaretPosition(this.el.nativeElement as HTMLInputElement, caret);
-      
-      console.log('new nodeValue was set');
     }
   }
   
