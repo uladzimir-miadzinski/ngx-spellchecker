@@ -92,7 +92,7 @@ export class SpellcheckerDirective implements OnInit {
   @HostListener('keyup', ['$event'])
   async onKeyUp(e) {
     if (e.which === KeyboardButtons.Backspace || e.which === KeyboardButtons.Delete) {
-      (this.el.nativeElement as HTMLInputElement).dispatchEvent(new Event('keypress'));
+      await this.spellcheck();
     }
   }
   
@@ -102,13 +102,6 @@ export class SpellcheckerDirective implements OnInit {
     await this.spellcheck();
   }
   
-  async spellcheck() {
-    const el = this.el.nativeElement as HTMLInputElement;
-    const textToSend = el.innerText || '';
-    const response = await this.spellcheckService.checkText(textToSend);
-    await this.spellWordsHtml(response.misspelledWords, el);
-  }
-  
   @HostListener('contextmenu', ['$event'])
   onContextMenu(e: MouseEvent) {
     const dataSuggest = (e.target as HTMLSpanElement).dataset.suggest;
@@ -116,6 +109,92 @@ export class SpellcheckerDirective implements OnInit {
       const suggestions = dataSuggest.split(',');
       console.log(suggestions);
     }
+  }
+  
+  /*@HostListener('contextmenu', ['$event'])
+  onContextMenu(e: MouseEvent) {
+    let targetCkeditor = null;
+    
+    for (let instanceProp in e.view['CKEDITOR'].instances) {
+      const instance = e.view['CKEDITOR'].instances[instanceProp];
+      if (Array.from(instance.element.$.classList).includes('cke_focus')) {
+        targetCkeditor = instance;
+        break;
+      }
+    }
+    
+    /*`
+      ​<span class=​"cke_menuitem">
+        ​<a class=​"cke_menubutton cke_menubutton__paste cke_menubutton_off cke_menubutton__paste"
+        href=​"javascript:​void('Вставить')​" title=​"Вставить (Ctrl+V)​" tabindex=​"-1" _cke_focus=​"1"
+        hidefocus=​"true" role=​"menuitem" aria-label=​"Вставить" aria-describedby=​"cke_90_description"
+        aria-haspopup=​"false" aria-disabled=​"false" draggable=​"false">
+          ​<span class=​"cke_menubutton_inner">
+            ​<span class=​"cke_menubutton_icon">​…​</span>
+            ​<span class=​"cke_menubutton_label">​Вставить​</span>
+            ​<span class=​"cke_menubutton_label cke_menubutton_shortcut">​Ctrl+V​</span>
+          ​</span>
+        ​</a>
+        ​<span id=​"cke_90_description" class=​"cke_voice_label" aria-hidden=​"false">​Комбинация клавиш Ctrl+V​</span>
+      ​</span>​`;*/
+  
+  /*console.log(targetCkeditor);
+  console.dir(targetCkeditor.contextMenu.items[0]);
+  const contextMenuIframe = document.querySelector('.cke_panel_frame') as HTMLIFrameElement;
+  const ckeMenu = contextMenuIframe.contentWindow.document.body.querySelector('.cke_menu');
+  console.log(ckeMenu);
+  
+  const dataSuggest = (e.target as HTMLSpanElement).dataset.suggest;
+  if (dataSuggest) {
+    const suggestions = dataSuggest.split(',');
+    suggestions.forEach(suggestion => {
+      const menuItem = document.createElement('span');
+      menuItem.setAttribute('class', 'cke_menuitem');
+      
+      const a = document.createElement('a');
+      a.setAttribute('class', 'cke_menubutton cke_menubutton__paste cke_menubutton_off cke_menubutton__paste');
+      a.setAttribute('title', suggestion);
+      a.setAttribute('role', 'menuitem');
+      
+      const inner = document.createElement('span');
+      inner.setAttribute('class', 'cke_menubutton_inner');
+      
+      const ckeBtn = document.createElement('span');
+      ckeBtn.setAttribute('class', 'cke_menubutton_icon');
+      ckeBtn.innerHTML = '...';
+      
+      const ckeLabel = document.createElement('span');
+      ckeLabel.setAttribute('class', 'cke_menubutton_label');
+      ckeLabel.innerHTML = suggestion;
+      
+      const ckeShortcut = document.createElement('span');
+      ckeShortcut.setAttribute('class', 'cke_menubutton_label cke_menubutton_shortcut');
+      ckeShortcut.innerHTML = '...';
+      
+      const descr = document.createElement('span');
+      ckeShortcut.setAttribute('class', 'cke_voice_label');
+      ckeShortcut.innerHTML = '​Комбинация клавиш не назначена';
+
+      inner.appendChild(ckeBtn);
+      inner.appendChild(ckeLabel);
+      inner.appendChild(ckeShortcut);
+      a.appendChild(inner);
+
+      menuItem.appendChild(a);
+      menuItem.appendChild(descr);
+      
+      ckeMenu.appendChild(menuItem);
+    });
+    console.log(suggestions);
+  }
+  console.log(targetCkeditor.contextMenu.items);
+}*/
+  
+  async spellcheck() {
+    const el = this.el.nativeElement as HTMLInputElement;
+    const textToSend = el.innerText || '';
+    const response = await this.spellcheckService.checkText(textToSend);
+    await this.spellWordsHtml(response.misspelledWords, el);
   }
   
   async spellWordsHtml(misspelledWords, el: HTMLInputElement) {
