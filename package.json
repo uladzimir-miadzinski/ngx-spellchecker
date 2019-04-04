@@ -2,8 +2,11 @@
   "name": "spellcheck-test",
   "version": "0.0.0",
   "scripts": {
+    "copy:spellchecker:js": "copyfiles -u 3 \"./src/assets/plugins/spellchecker/plugin.js\" \"./src/assets/ckeditor/plugins\"",
     "ng": "ng",
-    "start": "npm build && ng serve --port 4199",
+    "deploy": "http-server ./dist",
+    "start": "yarn copy:spellchecker:js && yarn build && yarn deploy",
+    "serve": "ng serve --port 4199",
     "start:server": "cd server && npm start",
     "build": "ng build",
     "test": "ng test",
@@ -48,6 +51,10 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "~3.2.2"
+    "typescript": "~3.2.2",
+    "ckeditor": "4.11.3",
+    "@types/ckeditor": "4.9.8",
+    "copyfiles": "2.1.0",
+    "http-server": "0.11.1"
   }
 }
