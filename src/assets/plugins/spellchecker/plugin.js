@@ -1,12 +1,6 @@
 CKEDITOR.plugins.add('spellchecker', {
   init(editor) {
     
-    editor.addCommand('spellcheck', {
-      exec: function (editor) {
-        alert('myCommand');
-      }
-    });
-    
     editor.ui.addButton('Spellchecker', {
       label: 'Spellcheck is Active',
       toolbar: 'insert'
@@ -14,18 +8,31 @@ CKEDITOR.plugins.add('spellchecker', {
     
     if (editor.contextMenu) {
       editor.contextMenu.addListener((element, selection) => {
+        
+        const genSpellfixCommand = (word, currentSelection) => ({
+          exec: function(ckeInstance) {
+            ckeInstance.container.$.innerHTML = ckeInstance.container.$.innerHTML.replace(currentSelection.getStartElement().$.outerHTML, word);
+          }
+        });
+        
         const suggestions = (element.$.dataset.suggest || '').split(',');
         
         editor.addMenuGroup('suggestions');
         
         //this.path
-        const menuItemsCollection = suggestions.map(suggestion => ({
-          label: suggestion,
-          icon: '',
-          command: 'spellcheck',
-          group: 'suggestions',
-          order: 1
-        }));
+        const menuItemsCollection = suggestions.map(suggestion => {
+          const commandName = `spellcheck_${suggestion}`;
+          
+          editor.addCommand(commandName, genSpellfixCommand(suggestion, selection));
+          
+          return {
+            label: suggestion,
+            icon: '',
+            command: commandName,
+            group: 'suggestions',
+            order: 1
+          };
+        });
         
         if (menuItemsCollection.length && menuItemsCollection[0].label === '') {
           return;
@@ -51,7 +58,7 @@ CKEDITOR.plugins.add('spellchecker', {
         editor.addMenuItems(submenu);
         
         return {
-          suggestions: CKEDITOR.TRISTATE_ON
+          suggestions: CKEDITOR.TRISTATE_OFF
         };
       });
       

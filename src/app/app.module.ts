@@ -6,6 +6,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 CKEDITOR.config.extraPlugins = 'spellchecker';
+CKEDITOR.config.language = 'en';
 
 @NgModule({
   declarations: [

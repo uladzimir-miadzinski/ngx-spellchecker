@@ -12,7 +12,6 @@ export class AppComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    CKEDITOR.config.language = 'en';
   }
   
 }
