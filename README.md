@@ -1,6 +1,6 @@
 # Make it real!
 
-This project will help you to make ckeditor spelling free for you! Try it!
+This project will help you to make ckeditor spelling free for you! Taste it!
 
 ![Ckeditor Spelling Example](https://media.giphy.com/media/iJyncAaoxzoASTuM2W/giphy.gif)
 
