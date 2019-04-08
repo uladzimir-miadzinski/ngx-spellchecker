@@ -1,3 +1,9 @@
+# Make it real!
+
+This project will help you to make ckeditor spelling free for you! Try it!
+
+![Ckeditor Spelling Example](https://media.giphy.com/media/iJyncAaoxzoASTuM2W/giphy.gif)
+
 # SpellcheckTest
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.6.
